@@ -46,7 +46,3 @@ jobs:
         with:
           name: boorusama-apk
           path: boorusama-apk.zip
-          uses: actions/upload-artifact@v4
-          with:
-            name: boorusama-apk
-            path: boorusama-apk.zip
