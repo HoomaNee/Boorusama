@@ -24,6 +24,9 @@ jobs:
           channel: stable
           flutter-version: 3.13.3
 
+      - name: Disable Flutter telemetry
+        run: flutter config --no-analytics
+
       - name: Get Flutter packages
         run: flutter pub get
 
