@@ -45,23 +45,6 @@ jobs:
 
       - name: Generate boilerplate code
         run: flutter pub run build_runner build --delete-conflicting-outputs
-          
-      - name: Setup Firebase Project
-        run: |
-          curl -sL https://firebase.tools | bash
-          dart pub global activate flutterfire_cli
-          flutterfire configure --project=${{ secrets.FIREBASE_DEV_NAME }} \
-          --platforms=android --yes \
-          --out=lib/core/firebase/firebase_options_dev.dart \
-          --android-package-name=com.degenk.boorusama.dev \
-          --android-out=android/app/src/dev/google-services.json \
-          --token=${{ secrets.FIREBASE_AUTH_TOKEN }} -f > null
-          flutterfire configure --project=${{ secrets.FIREBASE_PROD_NAME }} \
-          --platforms=android --yes \
-          --out=lib/core/firebase/firebase_options_prod.dart \
-          --android-package-name=com.degenk.boorusama \
-          --android-out=android/app/src/prod/google-services.json \
-          --token=${{ secrets.FIREBASE_AUTH_TOKEN }} -f > null
 
       - name: Get app version
         id: get_version
@@ -90,6 +73,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - run: mkdir /tmp/artifacts
 
       - name: Download artifacts
