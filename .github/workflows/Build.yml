@@ -21,13 +21,6 @@ jobs:
             artifact_name: nightly-dev-apk
             artifact_path: build/app/outputs/apk/dev/release/*.apk
 
-          - target: ios
-            os: macos-latest
-            flutter_version: '3.32.8'
-            flutter_channel: 'stable'
-            artifact_name: nightly-dev-ios
-            artifact_path: build/*.ipa
-
     runs-on: ${{matrix.os}}
     steps:
       - name: Checkout
@@ -47,8 +40,6 @@ jobs:
           flutter-version: ${{matrix.flutter_version}}
           channel: ${{matrix.flutter_channel}}
 
-      # **Removed keystore decode and key.properties creation steps for unsigned APK**
-
       - name: Install Flutter dependencies
         run: flutter pub get
 
@@ -60,26 +51,14 @@ jobs:
           curl -sL https://firebase.tools | bash
           dart pub global activate flutterfire_cli
           flutterfire configure --project=${{ secrets.FIREBASE_DEV_NAME }} \
-          --platforms=android,ios,macos --yes \
+          --platforms=android --yes \
           --out=lib/core/firebase/firebase_options_dev.dart \
-          --ios-bundle-id=com.degenk.boorusama.dev \
-          --ios-build-config=Release-dev \
-          --ios-out=ios/flavors/dev/GoogleService-Info.plist \
-          --macos-bundle-id=com.degenk.boorusama.dev \
-          --macos-build-config=Release-dev \
-          --macos-out=macos/flavors/dev/GoogleService-Info.plist \
           --android-package-name=com.degenk.boorusama.dev \
           --android-out=android/app/src/dev/google-services.json \
           --token=${{ secrets.FIREBASE_AUTH_TOKEN }} -f > null
           flutterfire configure --project=${{ secrets.FIREBASE_PROD_NAME }} \
-          --platforms=android,ios,macos --yes \
+          --platforms=android --yes \
           --out=lib/core/firebase/firebase_options_prod.dart \
-          --ios-bundle-id=com.degenk.boorusama \
-          --ios-build-config=Release \
-          --ios-out=ios/flavors/prod/GoogleService-Info.plist \
-          --macos-bundle-id=com.degenk.boorusama \
-          --macos-build-config=Release \
-          --macos-out=macos/flavors/prod/GoogleService-Info.plist \
           --android-package-name=com.degenk.boorusama \
           --android-out=android/app/src/prod/google-services.json \
           --token=${{ secrets.FIREBASE_AUTH_TOKEN }} -f > null
@@ -94,19 +73,6 @@ jobs:
       - name: Build APKs (Android)
         if: matrix.target == 'android'
         run: flutter build apk --release --flavor dev --dart-define-from-file env/dev.json
-
-      - name: Build release (iOS)
-        if: matrix.target == 'ios'
-        run: flutter build ios --release --no-codesign --flavor dev --dart-define-from-file env/dev.json -t lib/main.dart
-
-      - name: Build ipa (iOS)
-        if: matrix.target == 'ios'
-        run: |
-          mkdir build/Payload
-          cp -r build/ios/Release-dev-iphoneos/Boorusama-DEV.app/ build/Payload/Boorusama-DEV.app/
-          cd build
-          zip -ro ${{ steps.get_version.outputs.appname }}_${{ steps.get_version.outputs.version }}-dev.ipa Payload
-          rm -rf Payload
 
       - name: Publish artifacts
         uses: actions/upload-artifact@v4
@@ -141,7 +107,7 @@ jobs:
       - name: Publishing
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "/tmp/artifacts/nightly-dev-apk/*.apk,/tmp/artifacts/nightly-dev-ios/*.ipa"
+          artifacts: "/tmp/artifacts/nightly-dev-apk/*.apk"
           tag: ${{github.ref_name}}
           bodyFile: changelogs/v${{steps.get_version.outputs.version}}.md
           prerelease: contains(github.ref, 'pre')
