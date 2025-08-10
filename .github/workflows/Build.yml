@@ -5,8 +5,6 @@ on:
     branches:
       - 'master'
 
-#env:
-
 permissions:
   contents: write
 
@@ -42,14 +40,6 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-#
-#     Unnecessary if you using Github Actions image
-#
-#      - name: Setup Android SDK
-#        uses: android-actions/setup-android@v3
-#        with:
-#          accept-android-sdk-licenses: true
-#          log-accepted-android-sdk-licenses: false
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -57,18 +47,8 @@ jobs:
           flutter-version: ${{matrix.flutter_version}}
           channel: ${{matrix.flutter_channel}}
 
-      - name: Decode keystore (Android)
-        if: matrix.target == 'android'
-        run: echo ${{secrets.ENCODED_KEYSTORE}} | base64 -di > android/app/key.jks
+      # **Removed keystore decode and key.properties creation steps for unsigned APK**
 
-      - name: Create key.properties (Android)
-        if: matrix.target == 'android'
-        run: |
-          echo 'storePassword=${{secrets.KEYSTORE_PASSWORD}}' >> android/key.properties
-          echo 'keyPassword=${{secrets.KEY_PASSWORD}}' >> android/key.properties
-          echo 'keyAlias=${{secrets.KEY_ALIAS}}' >> android/key.properties
-          echo 'storeFile=key.jks' >> android/key.properties
-          
       - name: Install Flutter dependencies
         run: flutter pub get
 
@@ -114,11 +94,6 @@ jobs:
       - name: Build APKs (Android)
         if: matrix.target == 'android'
         run: flutter build apk --release --flavor dev --dart-define-from-file env/dev.json
-        env:
-          KEYSTORE_PASSWORD: ${{secrets.KEYSTORE_PASSWORD}}
-          KEY_ALIAS: ${{secrets.KEY_ALIAS}}
-          KEY_PASSWORD: ${{secrets.KEY_PASSWORD}}
-          STORE_FILE: key.jks
 
       - name: Build release (iOS)
         if: matrix.target == 'ios'
