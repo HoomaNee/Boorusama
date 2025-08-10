@@ -5,6 +5,7 @@ on:
     branches: [master]
   pull_request:
     branches: [master]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -29,7 +30,7 @@ jobs:
         run: zip boorusama-apk.zip build/app/outputs/flutter-apk/app-release.apk
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: boorusama-apk
           path: boorusama-apk.zip
