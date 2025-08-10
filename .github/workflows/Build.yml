@@ -1,0 +1,35 @@
+name: Build Boorusama APK
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'stable'
+
+      - name: Get Flutter packages
+        run: flutter pub get
+
+      - name: Build release APK
+        run: flutter build apk --release
+
+      - name: Zip unsigned APK
+        run: zip boorusama-apk.zip build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: boorusama-apk
+          path: boorusama-apk.zip
